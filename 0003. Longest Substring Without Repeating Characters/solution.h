@@ -4,6 +4,8 @@ using std::string;
 using std::unordered_map;
 #include <algorithm>
 using std::max;
+#include <vector>
+using std::vector;
 
 // version1: two cumbersome
 //class Solution {
@@ -59,13 +61,12 @@ class Solution {
 public:
     int lengthOfLongestSubstring(string s) {
         size_t f = 0, maxL = 0;
-        unordered_map<char, int> mp;
+        vector<int> mp(256, -1);
         for (size_t i = 0; i < s.length(); i++)
         {
-            auto b = mp.find(s[i]);
-            if (b != mp.end() && f <= b->second)
+            if (mp[s[i]] != -1 && f <= mp[s[i]])
             {
-                f = b->second + 1;
+                f = mp[s[i]] + 1;
             }
             mp[s[i]] = i;
             maxL = max(i - f + 1, maxL);
