@@ -4,6 +4,7 @@
 TEST_CASE("Longest Substring Without Repeating Characters", "[lengthOfLongestSubstring]")
 {
     Solution s;
+    REQUIRE(s.lengthOfLongestSubstring("umvejcuuk") == 6);
     REQUIRE( s.lengthOfLongestSubstring("abcabcbb") == 3 );
     REQUIRE( s.lengthOfLongestSubstring("bbbbb") == 1 );
     REQUIRE( s.lengthOfLongestSubstring("a") == 1 );
