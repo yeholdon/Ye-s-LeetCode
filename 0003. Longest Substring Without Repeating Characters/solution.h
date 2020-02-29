@@ -35,6 +35,26 @@ using std::max;
 //};
 
 // version 2: more simple
+//class Solution {
+//public:
+//    int lengthOfLongestSubstring(string s) {
+//        size_t f = 0, maxL = 0;
+//        unordered_map<char, int> mp;
+//        for (size_t i = 0; i < s.length(); i++)
+//        {
+//            auto b = mp.find(s[i]);
+//            if (b != mp.end() && f <= b->second)
+//            {
+//                f = b->second + 1;
+//            }
+//            mp[s[i]] = i;
+//            maxL = max(i - f + 1, maxL);
+//        }
+//        return maxL;
+//    }
+//};
+
+// version 3: the fastest, replace unordered_map with hash array.
 class Solution {
 public:
     int lengthOfLongestSubstring(string s) {
