@@ -3,7 +3,7 @@
 ## 思路一
 **空间换时间**：将两个有序数组归并进一个目标有序总序列，最后返回总序列的中间值。这样就是需要一个大小为两序列长度和的数组来存归并后的数组，但是时间复杂度可以降到最低。返回中位数值的时候，可以返回(num[mid] + num[mid + num.size() - 1])/2.0（其中mid = (nums1.size() + nums2.size())/2)。
 ## 思路二
->> 来自leetcode discuss的[高赞回答](https://leetcode.com/problems/median-of-two-sorted-arrays/discuss/2588/O(lg(m%2Bn))-c%2B%2B-solution-using-kth-smallest-number)
+> 来自leetcode discuss的[高赞回答](https://leetcode.com/problems/median-of-two-sorted-arrays/discuss/2588/O(lg(m%2Bn))-c%2B%2B-solution-using-kth-smallest-number)
 
 ### “查找第k大的数“函数：findKth()
 
