@@ -1,31 +1,80 @@
 # 思路(C++)
-- 这题如果没有把握好方向，盲目用两个下标指针来依次移动，会有很多的情况(corner cases)需要处理，很容易出漏洞。
+
 ## 思路一
-**空间换时间**：将两个有序数组归并进一个目标有序总序列，最后返回总序列的中间值。这样就是需要一个大小为两序列长度和的数组来存归并后的数组，但是时间复杂度可以降到最低。返回中位数值的时候，可以返回(num[mid] + num[mid + num.size() - 1])/2.0（其中mid = (nums1.size() + nums2.size())/2)。
+常规遍历法，时间复杂度O(n^2), 但是写起来比较简洁，思路也清晰。
+对于每一个起始的单字符或者两个相同的连续字符的情况，不断向两端拓展直至不是回文子串。
+
+```c
+#include <string>
+using std::string;
+
+class Solution {
+    void longestPalindrome(const string& s, int b, int e, int &start, int &last) {
+        int len = s.size();
+        while (b >= 0 && e < len && s[b] == s[e])
+            --b, ++e;
+        ++b, --e;
+        if (e - b > last - start) {
+            start = b;
+            last = e;
+        }
+    }
+
+public:
+    string longestPalindrome(string s) {
+        int len = s.size();
+        if (len == 0) return s;
+        int start = 0, last = 0;
+        for (int i=0; i<len-1; ++i) {
+            longestPalindrome(s, i, i, start, last);
+            longestPalindrome(s, i, i+1, start, last);
+        }
+        return s.substr(start, last-start+1);
+    }
+};
+```
+测试结果40ms
 ## 思路二
-> 来自leetcode discuss的[高赞回答](https://leetcode.com/problems/median-of-two-sorted-arrays/discuss/2588/O(lg(m%2Bn))-c%2B%2B-solution-using-kth-smallest-number)
+DP(动态规划）：复杂度O(n^2).
+dp[i][j] 为bool型，为true代表字串s[i]~s[j]为回文子串，否则则为非回文子串。且状态转移方程为dp[i+1][j-1]到dp[i][j]因此是从中间到两端。这和其它的一些状态转移方式不同。因此循环变量应该为回文子串的长度，边界条件要分回文子串长度为奇数和偶数两种情况讨论，即计算dp[i][i+1]和dp[i][i]的值。对从3开始的每个长度都判断整个字符串所有当前长度的回文子串的头尾字符是否相等，并结合次头尾字符的dp[i+1][j-1]值得到dp[i][j]的值。这种方法写起来比较麻烦，代码也比较复杂，复杂度也比较高。
 
-### “查找第k大的数“函数：findKth()
+测试结果500~600ms左右
 
-我们有两个数组
+## 思路三
+类似思路一，只不过可以利用连续重复字符的特点，在遍历每个起始回文中心字符的时候，直接将两端指针指向连续重复子串的两端再向外拓展，这样可以避免将重复的字符作为中心字符进行判断，从而优化。比如abbbc这个字符串里，以三个b中间的b作为起始字符向外拓展得到的最长回文子串必然是以这三个b作为起始字符向外拓展的情况中最长的。这种方法只在有重复连续字符的情况下有优化效果，其他情况下的复杂度还是O(n^2)
+
+```cpp
+#include <string>
+#include <vector>
+using std::string;
+
+const int maxn = 1010;
+// dp array
+int dp[maxn][maxn] = { 0 };
+size_t ans = 1, idxl = 0;
+class Solution {
+public:
+	string longestPalindrome(string s) {
+		if (s.empty()) return "";
+		if (s.size() == 1) return s;
+		int min_start = 0, max_len = 1;
+		for (int i = 0; i < s.size();) {
+			if (s.size() - i <= max_len / 2) break;
+			int j = i, k = i;
+			while (k < s.size() - 1 && s[k + 1] == s[k]) ++k; // Skip duplicate characters.
+			i = k + 1;
+			while (k < s.size() - 1 && j > 0 && s[k + 1] == s[j - 1]) { ++k; --j; } // Expand.
+			int new_len = k - j + 1;
+			if (new_len > max_len) { min_start = j; max_len = new_len; }
+		}
+		return s.substr(min_start, max_len);
+	}
+
+};
 ```
-nums1[0], nums1[1]....nums1[m - 1];
-nums2[0], nums2[2]....nums2[n - 1];
-```
-按序合并后的结果为：
+## 思路四（Manacher算法）
+经典的解决最长回文子串问题的“马拉车”算法。复杂度为O(n)
+参见https://segmentfault.com/a/1190000008484167 （不过有点小问题，评论区已指出）
 
-`num[0],num[1],num[2]...num[m + n - 1];`
 
-num[k - 1]为数组num里第k大的数
 
-比较nums1[k/2 - 1] 和 nums2[k/2 - 1]
-
-结论：如果 nums1[k/2 - 1] < nums2[k/2 - 1]
-则nums1[k/2 - 1]和它左边的数都比num[]里第k大的数小(即, num[k - 1])
-
-证明：因为，极端情况就是，nums2的nums2[0...k/2 - 2]都比nums1[k/2 - 1]小，这时候，加上nums1[k/2 - 1]和它左边的k/2 - 1个数，比nums1[k/2 - 1]小的数共有k/2 - 1 + k/2 - 1 = k - 2个数，所以，算上nums1[k/2 - 1]本身，就有k-1个数比num的第k个数num[k-1]小。（ nums1[k/2 - 1] > nums2[k/2 - 1]的情况也类似）
-
-利用以上结论，就可以用递归的方法，不断缩小查找范围，直到找到目标。这种方式空间复杂度最低。
-
-### 注意点
-思路二的一个注意点就是，当size1 < k/2 的情况，nums1缩小的范围就应该size1，即整个nums1。这个通过min(k/2, size1)来解决。还有就是为了方便处理，统一将当前元素少的数组放在前面。
